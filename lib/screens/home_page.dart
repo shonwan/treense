@@ -35,17 +35,15 @@ Future<List<double>?> preprocessImage(File imageFile, List<int> inputShape) asyn
     img.Image? image = img.decodeImage(imageFile.readAsBytesSync());
     if (image == null) return null;
 
+    // Resize the image to the input shape dimensions
     int inputHeight = inputShape[1];
     int inputWidth = inputShape[2];
     img.Image resizedImage = img.copyResize(image, width: inputWidth, height: inputHeight);
 
-    if (inputShape[3] == 1) {
-      resizedImage = img.grayscale(resizedImage);
-    }
-
+    // Normalize pixel values to [0, 1]
     List<double> input = [];
-    for (var pixel in resizedImage.getBytes(format: inputShape[3] == 1 ? img.Format.luminance : img.Format.rgb)) {
-      input.add(pixel / 255.0);
+    for (var pixel in resizedImage.getBytes(format: img.Format.rgb)) {
+      input.add(pixel / 255.0); // Normalize to [0, 1]
     }
 
     return input;
@@ -55,31 +53,37 @@ Future<List<double>?> preprocessImage(File imageFile, List<int> inputShape) asyn
   }
 }
 
+
 Future<String> classifyImage(File imageFile) async {
   try {
-    var inputShape = interpreter.getInputTensor(0).shape;
+    var inputShape = interpreter.getInputTensor(0).shape; // Example: [1, 180, 180, 3]
     List<double>? input = await preprocessImage(imageFile, inputShape);
-    if (input == null) {
-      return 'Error processing image';
-    }
+    if (input == null) return 'Error processing image';
 
+    // Reshape the input to match the model's expected input tensor shape
     var inputTensor = input.reshape(inputShape);
 
+    // Prepare the output tensor
     var outputShape = interpreter.getOutputTensor(0).shape;
     var output = List.filled(outputShape.reduce((a, b) => a * b), 0.0).reshape(outputShape);
 
     interpreter.run(inputTensor, output);
 
-    if (output[0][0] > output[0][1]) {
-      return 'Healthy';
-    } else {
-      return 'Unhealthy';
-    }
+    // Interpret the output
+    print('Model Output: $output');
+
+    // Assuming output[0][0] corresponds to "Healthy" and output[0][1] to "Unhealthy"
+    double healthyProbability = output[0][3];
+    double unhealthyProbability = output[0][4];
+
+    return healthyProbability > unhealthyProbability ? 'Healthy' : 'Unhealthy';
   } catch (e) {
     print('Error classifying image: $e');
     return 'Error during classification';
   }
 }
+
+
 
 class HomePage extends StatelessWidget {
   Future<void> navigateToResultPage(BuildContext context, String result) async {
