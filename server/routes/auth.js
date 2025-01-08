@@ -34,7 +34,7 @@ router.post("/signup", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Insert new user
-    const { data, error } = await supabase.from("users").insert([ 
+    const { data, error } = await supabase.from("users").insert([
       {
         first_name: firstName,
         last_name: lastName,
@@ -52,6 +52,7 @@ router.post("/signup", async (req, res) => {
       .json({ message: "Error creating user", error: err.message });
   }
 });
+
 
 /**
  * User Login Route
@@ -77,15 +78,11 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-    res.status(200).json({ message: "Login successful", token });
+    res.status(200).json({ message: "Login successful", user });
   } catch (err) {
     res.status(500).json({ message: "Error logging in", error: err.message });
   }
 });
-
 /**
  * User Profile Route (With Authentication Middleware)
  */
