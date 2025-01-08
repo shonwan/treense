@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'screens/home_page.dart';
 import 'screens/landing_page.dart';
 import 'screens/result_page.dart';
 
+const supabaseUrl = 'https://zjvbmahavecgovtgjkch.supabase.co';
+const supabaseKey =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqdmJtYWhhdmVjZ292dGdqa2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMxMDM0MDQsImV4cCI6MjA0ODY3OTQwNH0.s6D59MWDEeEAKUnAco7_RSoLjbkRbivqhJaMmVpttpQ';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: supabaseUrl,
+    anonKey: supabaseKey,
+  );
 
   // Make sure the model is loaded before the app starts
   await loadModel();

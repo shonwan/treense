@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ResultPage extends StatefulWidget {
   @override
@@ -9,6 +10,7 @@ class ResultPage extends StatefulWidget {
 
 class _ResultPageState extends State<ResultPage> {
   String? _currentLocation;
+  bool isLoading = false;  // Track loading state
 
   @override
   void initState() {
@@ -18,7 +20,6 @@ class _ResultPageState extends State<ResultPage> {
 
   Future<void> _fetchLocation() async {
     try {
-      // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         setState(() {
@@ -27,7 +28,6 @@ class _ResultPageState extends State<ResultPage> {
         return;
       }
 
-      // Request permissions if needed
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -46,13 +46,12 @@ class _ResultPageState extends State<ResultPage> {
         return;
       }
 
-      // Get the current position
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 
       setState(() {
-        _currentLocation = "Lat: ${position.latitude}, Long: ${position.longitude}";
+        _currentLocation = "Latitude: ${position.latitude}, Longitude: ${position.longitude}";
       });
     } catch (e) {
       setState(() {
@@ -61,15 +60,61 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
+  Future<void> _uploadToSupabase(String imagePath, String result) async {
+    setState(() {
+      isLoading = true;  // Start loading when the upload starts
+    });
+
+    try {
+      final file = File(imagePath);
+      final fileName = 'uploads/${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      final storage = Supabase.instance.client.storage;
+      final response = await storage.from('plant-images').upload(fileName, file);
+
+
+      // Get the public URL for the uploaded image
+      final imageUrl = storage.from('plant-images').getPublicUrl(fileName);
+
+      // Get location
+      final location = _currentLocation ?? "Unknown Location";
+
+      // Insert data into the 'plant_classifications' table
+      final data = {
+        'image_url': imageUrl,
+        'classification': result,
+        'location': location,
+      };
+
+      final resultInsert = await Supabase.instance.client
+          .from('plant_classifications')
+          .insert(data);
+
+
+      // Notify the user of success
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Image uploaded and classification saved successfully!"),
+        backgroundColor: Colors.green,
+      ));
+    } catch (e) {
+      // Handle any errors
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Error: $e"),
+        backgroundColor: Colors.red,
+      ));
+    } finally {
+      setState(() {
+        isLoading = false;  // Stop loading after the upload is complete
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Retrieve arguments passed from HomePage
-    final Map<String, dynamic> arguments =
-    ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final Map<String, dynamic> arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final String result = arguments['result'] as String;
     final String imagePath = arguments['imagePath'] as String;
 
-    // Define background and border color based on result
     Color backgroundColor = result == 'Healthy' ? Colors.green : Colors.red;
     Color borderColor = result == 'Healthy' ? Colors.green.shade700 : Colors.red.shade700;
     IconData resultIcon = result == 'Healthy' ? Icons.check_circle : Icons.error_rounded;
@@ -79,7 +124,7 @@ class _ResultPageState extends State<ResultPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.teal, Colors.tealAccent],
+            colors: [Colors.tealAccent, Colors.green],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -90,7 +135,6 @@ class _ResultPageState extends State<ResultPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Display the image
                 ClipRRect(
                   borderRadius: BorderRadius.circular(15.0),
                   child: Image.file(
@@ -110,29 +154,71 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                   child: Icon(
                     resultIcon,
-                    size: 50,
+                    size: 30,
                     color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 30),
-                Text(
-                  'The Plant is: $result',
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: resultTextColor,
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.8),  // Background color with transparency
+                    borderRadius: BorderRadius.circular(12.0),  // Rounded corners
+                    border: Border.all(color: resultTextColor, width: 3),  // Border with color
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 30),
-                if (_currentLocation != null)
-                  Text(
-                    'Current Location: $_currentLocation',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
+                  child: Text(
+                    'The Plant is: $result',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: resultTextColor,
                     ),
                     textAlign: TextAlign.center,
+                  ),
+                ),
+                if (_currentLocation != null)
+                  Container(
+                    padding: const EdgeInsets.all(16.0),
+                    margin: const EdgeInsets.symmetric(vertical: 10.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8),  // Background color with transparency
+                      borderRadius: BorderRadius.circular(12.0),  // Rounded corners
+                      border: Border.all(color: Colors.teal, width: 2),  // Border color and thickness
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.location_on,  // Location icon
+                              color: Colors.red,
+                              size: 24,  // Icon size
+                            ),
+                            const SizedBox(width: 8),  // Space between icon and text
+                            Text(
+                              'Current Location',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.teal.shade700,  // Color for title
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          _currentLocation?.replaceAll(",", "\n") ?? "Unknown Location",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,  // Color for the actual location
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                   )
                 else
                   const CircularProgressIndicator(),
@@ -141,13 +227,21 @@ class _ResultPageState extends State<ResultPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/home');
+                      onPressed: isLoading
+                          ? null  // Disable the button while loading
+                          : () async {
+                        // Upload to Supabase
+                        await _uploadToSupabase(imagePath, result);
                       },
-                      icon: const Icon(Icons.cloud_upload, color: Colors.teal),
-                      label: const Text(
-                        'Upload',
-                        style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
+                      icon: isLoading
+                          ? const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.teal),
+                        strokeWidth: 2,
+                      )
+                          : const Icon(Icons.cloud_upload, color: Colors.teal),
+                      label: Text(
+                        isLoading ? 'Uploading...' : 'Upload',
+                        style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -160,7 +254,7 @@ class _ResultPageState extends State<ResultPage> {
                     const SizedBox(width: 20),
                     ElevatedButton.icon(
                       onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/home');
+                        Navigator.pop(context);
                       },
                       icon: const Icon(Icons.home, color: Colors.teal),
                       label: const Text(

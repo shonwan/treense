@@ -119,7 +119,7 @@ class HomePage extends StatelessWidget {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.teal, Colors.tealAccent],
+            colors: [Colors.tealAccent, Colors.green],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
