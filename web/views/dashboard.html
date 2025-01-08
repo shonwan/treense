@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- Tailwind CSS -->
+    <link href="../src/output.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gray-800 text-white p-6">
+            <div class="text-center mb-12">
+                <img src="..//assets/images/logo-no-background.png" alt="TREENSE Logo" class="w-20 h-auto mb-4 mx-auto">
+                <h2 class="text-2xl font-bold">TREENSE</h2>
+            </div>
+            <a href="dashboard.html" id="dashboard-link" class="flex items-center space-x-2 py-3 text-lg hover:bg-gray-700 rounded px-3 mb-4">
+                <i class="fas fa-tachometer-alt"></i><span>Overview</span>
+            </a>
+            <a href="history.html" id="history-link" class="flex items-center space-x-2 py-3 text-lg hover:bg-gray-700 rounded px-3 mb-4">
+                <i class="fas fa-history"></i><span>History</span>
+            </a>
+            <a href="analytics.html" id="analytics-link" class="flex items-center space-x-2 py-3 text-lg hover:bg-gray-700 rounded px-3 mb-4">
+                <i class="fas fa-chart-line"></i><span>Analytics</span>
+            </a>
+            <a href="settings.html" id="settings-link" class="flex items-center space-x-2 py-3 text-lg hover:bg-gray-700 rounded px-3 mb-4">
+                <i class="fas fa-cogs"></i><span>Profile</span>
+            </a>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 p-8">
+            <div id="overview" class="space-y-8">
+                <h2 class="text-3xl font-semibold text-gray-800">Overview</h2>
+                <p class="text-lg text-gray-600">This is the overview section, providing a summary of the app's usage and key metrics.</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Stats Section -->
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                        <h3 class="text-xl font-medium text-gray-700">Total Seedlings Classified</h3>
+                        <p id="total-seedlings" class="text-2xl font-bold text-gray-900">Loading...</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                        <h3 class="text-xl font-medium text-gray-700">Healthy Seedlings</h3>
+                        <p id="healthy-seedlings" class="text-2xl font-bold text-gray-900">Loading...</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                        <h3 class="text-xl font-medium text-gray-700">Unhealthy Seedlings</h3>
+                        <p id="unhealthy-seedlings" class="text-2xl font-bold text-gray-900">Loading...</p>
+                    </div>
+                </div>
+
+                <!-- Recent Activities Section -->
+                <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
+                    <h3 class="text-xl font-medium text-gray-700 mb-4">Recent Activities</h3>
+                    <ul id="recent-uploads-list" class="space-y-4">
+                        <!-- Recent activities will be dynamically inserted here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../public/js/dash.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const currentPage = window.location.pathname.split("/").pop();
+
+            const links = {
+                "dashboard.html": "dashboard-link",
+                "history.html": "history-link",
+                "analytics.html": "analytics-link",
+                "settings.html": "settings-link"
+            };
+
+            if (links[currentPage]) {
+                document.getElementById(links[currentPage]).classList.add("bg-gray-700");
+            }
+
+
+        });
+    </script>
+</body>
+</html>

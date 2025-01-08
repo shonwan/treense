@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- Tailwind CSS -->
+    <link href="../src/output.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gray-800 text-white p-6">
+            <div class="text-center mb-12">
+                <img src="..//assets/images/logo-no-background.png" alt="TREENSE Logo" class="w-20 h-auto mb-4 mx-auto">
+                <h2 class="text-2xl font-bold">TREENSE</h2>
+            </div>
+            <!-- Sidebar Links -->
+            <a href="dashboard.html" id="dashboard-link" class="flex items-center space-x-2 py-3 text-lg hover:bg-gray-700 rounded px-3 mb-4">
+                <i class="fas fa-tachometer-alt"></i><span>Overview</span>
+            </a>
+            <a href="history.html" id="history-link" class="flex items-center space-x-2 py-3 text-lg hover:bg-gray-700 rounded px-3 mb-4">
+                <i class="fas fa-history"></i><span>History</span>
+            </a>
+            <a href="analytics.html" id="analytics-link" class="flex items-center space-x-2 py-3 text-lg hover:bg-gray-700 rounded px-3 mb-4">
+                <i class="fas fa-chart-line"></i><span>Analytics</span>
+            </a>
+            <a href="settings.html" id="settings-link" class="flex items-center space-x-2 py-3 text-lg hover:bg-gray-700 rounded px-3 mb-4">
+                <i class="fas fa-cogs"></i><span>Profile</span>
+            </a>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 p-8">
+            <div id="overview" class="space-y-8">
+                <h2 class="text-3xl font-semibold text-gray-800">Analysis Dashboard</h2>
+
+                <!-- Stats Section -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Total Scans Section -->
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                        <h3 class="text-xl font-medium text-gray-700">Total Scans</h3>
+                        <p id="total-scans" class="text-2xl font-bold text-gray-900">Loading...</p>
+                    </div>
+                    <!-- Healthy Rate Section -->
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                        <h3 class="text-xl font-medium text-gray-700">Healthy Rate</h3>
+                        <p id="healthy-rate" class="text-2xl font-bold text-gray-900">Loading...</p>
+                    </div>
+                    <!-- Unhealthy Rate Section -->
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                        <h3 class="text-xl font-medium text-gray-700">Unhealthy Rate</h3>
+                        <p id="unhealthy-rate" class="text-2xl font-bold text-gray-900">Loading...</p>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Bar Chart -->
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-medium text-gray-700 mb-4">Classification Trends</h3>
+                        <canvas id="healthChart"></canvas>
+                    </div>
+                    
+                    <!-- Pie Chart -->
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-medium text-gray-700 mb-4">Results Distribution</h3>
+                        <canvas id="classificationPieChart"></canvas>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics JavaScript -->
+    <script src="../public/js/analytics.js"></script>
+
+</body>
+</html>

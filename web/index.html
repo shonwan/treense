@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./public/css/styles.css">
+  <title>Log in to your account</title>
+</head>
+<body>
+  <div class="login-container">
+    <div class="image-section">
+      <!-- Optimized Image with Lazy Loading and Responsive Design -->
+      <img src="./assets/images/seedling.jpg" 
+           alt="Nature" 
+           loading="lazy" 
+           width="600" 
+           height="400" 
+           srcset="./assets/images/seedling.jpg 600w, ./assets/images/seedling.jpg 1200w" 
+           sizes="(max-width: 600px) 100vw, 50vw" />
+    </div>
+    <div class="form-section">
+      <h1>Log in to your account</h1>
+      <p>Don't have an account? <a href="./views/signup.html">Sign up</a></p>
+      <form id="loginForm">
+        <input type="email" id="email" placeholder="Email address" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <div class="password-info">
+          <label>
+            <input type="checkbox" id="showPassword" />
+            Show password
+          </label>
+        </div>
+        <button type="submit" class="login-btn">Log In</button>
+        <p><a href="#">Forgot Password?</a></p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Elements
+    const loginForm = document.getElementById("loginForm");
+    const passwordField = document.getElementById("password");
+    const showPasswordCheckbox = document.getElementById("showPassword");
+
+    // Toggle password visibility
+    showPasswordCheckbox.addEventListener("change", function() {
+      if (this.checked) {
+        passwordField.type = "text"; // Show password
+      } else {
+        passwordField.type = "password"; // Hide password
+      }
+    });
+
+    // Handle form submission
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const response = await fetch("http://localhost:3000/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          // Store the token in localStorage
+          localStorage.setItem("authToken", result.token);
+
+          // Redirect to the dashboard page
+
+          window.location.href = "./views/dashboard.html"; // Replace with your dashboard URL
+
+        } else {
+          alert(result.message || "Login failed. Please try again.");
+        }
+      } catch (error) {
+        alert("An error occurred during login. Please try again.");
+        console.error(error);
+      }
+    });
+  </script>
+</body>
+</html>
