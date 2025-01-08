@@ -1,9 +1,73 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
-class ResultPage extends StatelessWidget {
+class ResultPage extends StatefulWidget {
+  @override
+  _ResultPageState createState() => _ResultPageState();
+}
+
+class _ResultPageState extends State<ResultPage> {
+  String? _currentLocation;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLocation();
+  }
+
+  Future<void> _fetchLocation() async {
+    try {
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() {
+          _currentLocation = "Location services are disabled.";
+        });
+        return;
+      }
+
+      // Request permissions if needed
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() {
+            _currentLocation = "Location permissions are denied.";
+          });
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          _currentLocation = "Location permissions are permanently denied.";
+        });
+        return;
+      }
+
+      // Get the current position
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        _currentLocation = "Lat: ${position.latitude}, Long: ${position.longitude}";
+      });
+    } catch (e) {
+      setState(() {
+        _currentLocation = "Error fetching location: $e";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final String result = ModalRoute.of(context)!.settings.arguments as String;
+    // Retrieve arguments passed from HomePage
+    final Map<String, dynamic> arguments =
+    ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final String result = arguments['result'] as String;
+    final String imagePath = arguments['imagePath'] as String;
 
     // Define background and border color based on result
     Color backgroundColor = result == 'Healthy' ? Colors.green : Colors.red;
@@ -26,16 +90,27 @@ class ResultPage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // Display the image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(15.0),
+                  child: Image.file(
+                    File(imagePath),
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(height: 30),
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: backgroundColor,
-                    border: Border.all(color: borderColor, width: 5),
+                    border: Border.all(color: borderColor, width: 3),
                   ),
                   child: Icon(
                     resultIcon,
-                    size: 150,
+                    size: 50,
                     color: Colors.white,
                   ),
                 ),
@@ -50,7 +125,18 @@ class ResultPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 30),
-                // Row to display the buttons side by side
+                if (_currentLocation != null)
+                  Text(
+                    'Current Location: $_currentLocation',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                  )
+                else
+                  const CircularProgressIndicator(),
+                const SizedBox(height: 30),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -71,7 +157,7 @@ class ResultPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 20), // Space between buttons
+                    const SizedBox(width: 20),
                     ElevatedButton.icon(
                       onPressed: () {
                         Navigator.pushReplacementNamed(context, '/home');

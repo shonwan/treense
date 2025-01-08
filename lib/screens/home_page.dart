@@ -8,10 +8,6 @@ import 'result_page.dart';
 final ImagePicker _picker = ImagePicker();
 late Interpreter interpreter;
 
-// Counts for healthy and unhealthy
-int healthyCount = 0;
-int unhealthyCount = 0;
-
 Future<void> loadModel() async {
   try {
     interpreter = await Interpreter.fromAsset('assets/plant_modelH5.tflite');
@@ -47,20 +43,30 @@ Future<List<List<List<List<double>>>>> preprocessImage(File imageFile, List<int>
 
     // Normalize pixel values to [0, 1]
     List<List<List<List<double>>>> input = List.generate(
-        1,
-            (i) => List.generate(
-            inputHeight,
-                (j) => List.generate(inputWidth,
-                    (k) => List.generate(3, (l) => resizedImage.getPixel(k, j)[l] / 255.0, growable: false),
-                growable: false),
-            growable: false),
-        growable: false),
-  );
+      1,
+          (i) => List.generate(
+        inputHeight,
+            (j) => List.generate(
+          inputWidth,
+              (k) {
+            int pixel = resizedImage.getPixel(k, j);
+            return [
+              img.getRed(pixel) / 255.0,
+              img.getGreen(pixel) / 255.0,
+              img.getBlue(pixel) / 255.0
+            ];
+          },
+          growable: false,
+        ),
+        growable: false,
+      ),
+      growable: false,
+    );
 
-  return input;
+    return input;
   } catch (e) {
-  print('Error during preprocessing: $e');
-  return [];
+    print('Error during preprocessing: $e');
+    return [];
   }
 }
 
@@ -74,23 +80,22 @@ Future<String> classifyImage(File imageFile) async {
     if (input.isEmpty) return 'Error processing image';
 
     // Prepare the output tensor
-    var outputShape = interpreter.getOutputTensor(0).shape;
-    var output = List.filled(outputShape.reduce((a, b) => a * b), 0.0);
+    var outputShape = interpreter.getOutputTensor(0).shape; // Example: [1, 1]
+    var output = List.generate(outputShape[0], (_) => List.filled(outputShape[1], 0.0));
 
+    // Run inference
     interpreter.run(input, output);
 
-    // Interpret the output based on thresholding
-    double probability = output[0][0]; // Adjust if needed
+    // Access the probability from the output
+    double probability = output[0][0]; // Accessing the single value in the [1, 1] output
+
+    // Interpret the result based on thresholding
     if (probability > 0.5) {
-      // Unhealthy
-      unhealthyCount += 1;
       print('Image classified as Unhealthy (Probability: ${probability.toStringAsFixed(2)})');
-      return 'Unhealthy (Probability: ${probability.toStringAsFixed(2)})';
+      return 'Unhealthy';
     } else {
-      // Healthy
-      healthyCount += 1;
-      print('Image classified as Healthy (Probability: ${1 - probability.toStringAsFixed(2)})');
-      return 'Healthy (Probability: ${(1 - probability).toStringAsFixed(2)})';
+      print('Image classified as Healthy (Probability: ${(1 - probability).toStringAsFixed(2)})');
+      return 'Healthy';
     }
   } catch (e) {
     print('Error classifying image: $e');
@@ -99,8 +104,13 @@ Future<String> classifyImage(File imageFile) async {
 }
 
 class HomePage extends StatelessWidget {
-  Future<void> navigateToResultPage(BuildContext context, String result) async {
-    await Navigator.pushNamed(context, '/result', arguments: result);
+  Future<void> navigateToResultPage(
+      BuildContext context, String result, String imagePath) async {
+    await Navigator.pushNamed(
+      context,
+      '/result',
+      arguments: {'result': result, 'imagePath': imagePath},
+    );
   }
 
   @override
@@ -122,14 +132,10 @@ class HomePage extends StatelessWidget {
               children: [
                 ElevatedButton(
                   onPressed: () async {
-                    if (interpreter == null) {
-                      print('Interpreter not initialized');
-                      return;
-                    }
                     File? imageFile = await pickImageFromSource(ImageSource.camera);
                     if (imageFile != null) {
                       String result = await classifyImage(imageFile);
-                      navigateToResultPage(context, result);
+                      navigateToResultPage(context, result, imageFile.path);
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -154,14 +160,10 @@ class HomePage extends StatelessWidget {
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () async {
-                    if (interpreter == null) {
-                      print('Interpreter not initialized');
-                      return;
-                    }
                     File? imageFile = await pickImageFromSource(ImageSource.gallery);
                     if (imageFile != null) {
                       String result = await classifyImage(imageFile);
-                      navigateToResultPage(context, result);
+                      navigateToResultPage(context, result, imageFile.path);
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -182,15 +184,6 @@ class HomePage extends StatelessWidget {
                       color: Colors.black,
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'Healthy Count: $healthyCount',
-                  style: const TextStyle(fontSize: 18, color: Colors.black),
-                ),
-                Text(
-                  'Unhealthy Count: $unhealthyCount',
-                  style: const TextStyle(fontSize: 18, color: Colors.black),
                 ),
               ],
             ),
