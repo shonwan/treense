@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "concurrently": "^9.1.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
