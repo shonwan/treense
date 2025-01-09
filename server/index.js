@@ -5,7 +5,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 // Initialize Express app
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Middlewares
 app.use(cors());

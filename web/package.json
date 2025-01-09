@@ -4,20 +4,18 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-     "build": "tailwindcss build src/styles.css -o dist/styles.css"
-     
+    "build": "tailwindcss build src/styles.css -o dist/styles.css",
+    "start": "live-server dist"  
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "body-parser": "^1.20.3",
-    "cors": "^2.8.5",
-    "express": "^4.21.1",
-    "supabase": "^2.0.0"
+    "supabase": "^2.0.0"  
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^3.4.17",
+    "live-server": "^1.2.1"  
   }
 }
