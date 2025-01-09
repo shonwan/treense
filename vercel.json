@@ -5,10 +5,8 @@
       { "src": "web/package.json", "use": "@vercel/static-build" }
     ],
     "routes": [
-      { "src": "/server", 
-      "dest": "index.js" },
-      { "src": "/web", 
-      "dest": "index.html" }
+      { "src": "/api/(.*)", "dest": "index.js" },
+      { "src": "/(.*)", "dest": "web/$1" }
     ]
   }
   
