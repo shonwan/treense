@@ -19,7 +19,7 @@ void main() async {
   );
 
   // Make sure the model is loaded before the app starts
-  await loadModel();
+  await loadModels();
 
   // Request location permission when the app starts
   bool locationPermissionGranted = await _requestLocationPermission();

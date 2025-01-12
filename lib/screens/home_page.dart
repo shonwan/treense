@@ -6,17 +6,21 @@ import 'package:image/image.dart' as img;
 import 'result_page.dart';
 
 final ImagePicker _picker = ImagePicker();
-late Interpreter interpreter;
+late Interpreter plantDetectorInterpreter;
+late Interpreter healthCheckerInterpreter;
 
-Future<void> loadModel() async {
+// Load both models
+Future<void> loadModels() async {
   try {
-    interpreter = await Interpreter.fromAsset('assets/plant_modelH5.tflite');
-    print('Model loaded successfully.');
+    plantDetectorInterpreter = await Interpreter.fromAsset('assets/plant_modelH5.tflite');
+    healthCheckerInterpreter = await Interpreter.fromAsset('assets/plant_modelH5_combination.tflite');
+    print('Models loaded successfully.');
   } catch (e) {
-    print('Error loading model: $e');
+    print('Error loading models: $e');
   }
 }
 
+// Function to pick an image
 Future<File?> pickImageFromSource(ImageSource source) async {
   try {
     final XFile? pickedFile = await _picker.pickImage(source: source);
@@ -30,18 +34,16 @@ Future<File?> pickImageFromSource(ImageSource source) async {
   }
 }
 
-// Function to preprocess image (resize and normalize)
+// Preprocess the image
 Future<List<List<List<List<double>>>>> preprocessImage(File imageFile, List<int> inputShape) async {
   try {
     img.Image? image = img.decodeImage(imageFile.readAsBytesSync());
     if (image == null) return [];
 
-    // Resize the image to the input shape dimensions
     int inputHeight = inputShape[1];
     int inputWidth = inputShape[2];
     img.Image resizedImage = img.copyResize(image, width: inputWidth, height: inputHeight);
 
-    // Normalize pixel values to [0, 1]
     List<List<List<List<double>>>> input = List.generate(
       1,
           (i) => List.generate(
@@ -70,42 +72,63 @@ Future<List<List<List<List<double>>>>> preprocessImage(File imageFile, List<int>
   }
 }
 
-Future<String> classifyImage(File imageFile) async {
+// Function to classify if the image is a plant
+Future<bool> isPlant(File imageFile) async {
+
   try {
     // Get input shape of the model
-    var inputShape = interpreter.getInputTensor(0).shape; // Example: [1, 180, 180, 3]
+    var inputShape = plantDetectorInterpreter.getInputTensor(0).shape; // Example: [1, 180, 180, 3]
 
     // Preprocess image and reshape it to match input shape
     var input = await preprocessImage(imageFile, inputShape);
-    if (input.isEmpty) return 'Error processing image';
+    if (input.isEmpty) return false;
 
     // Prepare the output tensor
-    var outputShape = interpreter.getOutputTensor(0).shape; // Example: [1, 1]
+    var outputShape = plantDetectorInterpreter.getOutputTensor(0).shape; // Example: [1, 1]
     var output = List.generate(outputShape[0], (_) => List.filled(outputShape[1], 0.0));
 
     // Run inference
-    interpreter.run(input, output);
+    plantDetectorInterpreter.run(input, output);
 
     // Access the probability from the output
     double probability = output[0][0]; // Accessing the single value in the [1, 1] output
 
     // Interpret the result based on thresholding
     if (probability > 0.5) {
-      print('Image classified as Unhealthy (Probability: ${probability.toStringAsFixed(2)})');
-      return 'Unhealthy';
+      print('Image classified as Not Plant (Probability: ${probability.toStringAsFixed(2)})');
+      return false;
     } else {
-      print('Image classified as Healthy (Probability: ${(1 - probability).toStringAsFixed(2)})');
-      return 'Healthy';
+      print('Image classified as Plant (Probability: ${(1 - probability).toStringAsFixed(2)})');
+      return true;
     }
   } catch (e) {
     print('Error classifying image: $e');
+    return false;
+  }
+}
+
+// Function to check the health status of the plant
+Future<String> checkPlantHealth(File imageFile) async {
+  try {
+    var inputShape = healthCheckerInterpreter.getInputTensor(0).shape;
+    var input = await preprocessImage(imageFile, inputShape);
+    if (input.isEmpty) return 'Error processing image';
+
+    var outputShape = healthCheckerInterpreter.getOutputTensor(0).shape;
+    var output = List.generate(outputShape[0], (_) => List.filled(outputShape[1], 0.0));
+
+    healthCheckerInterpreter.run(input, output);
+
+    double probability = output[0][0];
+    return probability > 0.5 ? 'Unhealthy' : 'Healthy';
+  } catch (e) {
+    print('Error in health classification: $e');
     return 'Error during classification';
   }
 }
 
 class HomePage extends StatelessWidget {
-  Future<void> navigateToResultPage(
-      BuildContext context, String result, String imagePath) async {
+  Future<void> navigateToResultPage(BuildContext context, String result, String imagePath) async {
     await Navigator.pushNamed(
       context,
       '/result',
@@ -134,8 +157,25 @@ class HomePage extends StatelessWidget {
                   onPressed: () async {
                     File? imageFile = await pickImageFromSource(ImageSource.camera);
                     if (imageFile != null) {
-                      String result = await classifyImage(imageFile);
-                      navigateToResultPage(context, result, imageFile.path);
+                      bool isPlantImage = await isPlant(imageFile);
+                      if (isPlantImage) {
+                        String result = await checkPlantHealth(imageFile);
+                        navigateToResultPage(context, result, imageFile.path);
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('Warning'),
+                            content: Text('The selected image is not a plant.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -162,8 +202,25 @@ class HomePage extends StatelessWidget {
                   onPressed: () async {
                     File? imageFile = await pickImageFromSource(ImageSource.gallery);
                     if (imageFile != null) {
-                      String result = await classifyImage(imageFile);
-                      navigateToResultPage(context, result, imageFile.path);
+                      bool isPlantImage = await isPlant(imageFile);
+                      if (isPlantImage) {
+                        String result = await checkPlantHealth(imageFile);
+                        navigateToResultPage(context, result, imageFile.path);
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('Warning'),
+                            content: Text('The selected image is not a plant.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
                     }
                   },
                   style: ElevatedButton.styleFrom(
