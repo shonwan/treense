@@ -13,7 +13,7 @@ late Interpreter healthCheckerInterpreter;
 Future<void> loadModels() async {
   try {
     plantDetectorInterpreter = await Interpreter.fromAsset('assets/plant_modelH5.tflite');
-    healthCheckerInterpreter = await Interpreter.fromAsset('assets/plant_modelH5_combination.tflite');
+    healthCheckerInterpreter = await Interpreter.fromAsset('assets/health_modelH5.tflite');
     print('Models loaded successfully.');
   } catch (e) {
     print('Error loading models: $e');
@@ -109,21 +109,36 @@ Future<bool> isPlant(File imageFile) async {
 
 // Function to check the health status of the plant
 Future<String> checkPlantHealth(File imageFile) async {
-  try {
-    var inputShape = healthCheckerInterpreter.getInputTensor(0).shape;
-    var input = await preprocessImage(imageFile, inputShape);
-    if (input.isEmpty) return 'Error processing image';
 
-    var outputShape = healthCheckerInterpreter.getOutputTensor(0).shape;
+  try {
+    // Get input shape of the model
+    var inputShape = healthCheckerInterpreter.getInputTensor(0).shape; // Example: [1, 180, 180, 3]
+
+    // Preprocess image and reshape it to match input shape
+    var input = await preprocessImage(imageFile, inputShape);
+    if (input.isEmpty) return 'empty';
+
+    // Prepare the output tensor
+    var outputShape = healthCheckerInterpreter.getOutputTensor(0).shape; // Example: [1, 1]
     var output = List.generate(outputShape[0], (_) => List.filled(outputShape[1], 0.0));
 
+    // Run inference
     healthCheckerInterpreter.run(input, output);
 
-    double probability = output[0][0];
-    return probability > 0.5 ? 'Unhealthy' : 'Healthy';
+    // Access the probability from the output
+    double probability = output[0][0]; // Accessing the single value in the [1, 1] output
+
+    // Interpret the result based on thresholding
+    if (probability > 0.5) {
+      print('Image classified as Unhealthy (Probability: ${probability.toStringAsFixed(2)})');
+      return 'Unhealthy';
+    } else {
+      print('Image classified as Healthy (Probability: ${(1 - probability).toStringAsFixed(2)})');
+      return 'Healthy';
+    }
   } catch (e) {
-    print('Error in health classification: $e');
-    return 'Error during classification';
+    print('Error classifying image: $e');
+    return 'Unhealthy';
   }
 }
 
