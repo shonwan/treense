@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:geocoding/geocoding.dart';
 
 class ResultPage extends StatefulWidget {
   @override
@@ -50,9 +51,23 @@ class _ResultPageState extends State<ResultPage> {
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      setState(() {
-        _currentLocation = "Latitude: ${position.latitude}, Longitude: ${position.longitude}";
-      });
+      // Get the human-readable address using geocoding
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+        setState(() {
+          _currentLocation =
+          "${place.street}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
+        });
+      } else {
+        setState(() {
+          _currentLocation = "Unable to determine location name.";
+        });
+      }
     } catch (e) {
       setState(() {
         _currentLocation = "Error fetching location: $e";
@@ -76,14 +91,18 @@ class _ResultPageState extends State<ResultPage> {
       // Get the public URL for the uploaded image
       final imageUrl = storage.from('plant-images').getPublicUrl(fileName);
 
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
       // Get location
-      final location = _currentLocation ?? "Unknown Location";
+
+      final latlong = "Latitude: ${position.latitude}, Longitude: ${position.longitude}";
 
       // Insert data into the 'plant_classifications' table
       final data = {
         'image_url': imageUrl,
         'classification': result,
-        'location': location,
+        'location': latlong,
       };
 
       final resultInsert = await Supabase.instance.client
@@ -191,7 +210,7 @@ class _ResultPageState extends State<ResultPage> {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.location_on,  // Location icon
                               color: Colors.red,
                               size: 24,  // Icon size

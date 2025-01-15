@@ -36,6 +36,7 @@ dependencies:
   image: ^3.3.0
   geolocator: ^13.0.2
   supabase_flutter: ^2.8.3
+  geocoding: ^3.0.0
 #  tflite_flutter_helper_plus: ^0.0.2
 
 
