@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
-import 'result_page.dart';
 
 final ImagePicker _picker = ImagePicker();
 late Interpreter plantDetectorInterpreter;
 late Interpreter healthCheckerInterpreter;
+
 
 // Load both models
 Future<void> loadModels() async {
@@ -154,6 +154,18 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true, // Ensures the AppBar overlays the body
+      appBar: AppBar(
+        backgroundColor: Colors.transparent, // Transparent AppBar
+        elevation: 0, // No shadow
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0), // Adjust padding for logo
+          child: Image.asset(
+            'assets/logo.png', // Path to your logo image
+            fit: BoxFit.contain, // Ensures the logo fits properly
+          ),
+        ),
+      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -180,12 +192,42 @@ class HomePage extends StatelessWidget {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: Text('Warning'),
-                            content: Text('The selected image is not a plant.'),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0), // Rounded corners
+                            ),
+                            title: const Row(
+                              children: [
+                                Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+                                SizedBox(width: 10),
+                                Text(
+                                  'Warning',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            content: const Text(
+                              'The selected image is not a falcata plant. Please try again with a valid image.',
+                              style: TextStyle(fontSize: 16),
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(),
-                                child: Text('OK'),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: Colors.red,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'OK',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -194,22 +236,32 @@ class HomePage extends StatelessWidget {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 30.0),
+                    backgroundColor: Colors.teal, // A modern and vibrant background color
+                    foregroundColor: Colors.white, // Text color for better contrast
+                    padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 30.0), // Spacious padding
                     textStyle: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
+                      borderRadius: BorderRadius.circular(25.0), // More rounded corners for a sleek look
                     ),
+                    elevation: 5, // Adds a subtle shadow for depth
+                    shadowColor: Colors.black54, // Shadow color for better visibility
                   ),
-                  child: const Text(
-                    'Capture Image',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black,
-                    ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.camera_alt, size: 22, color: Colors.white), // Add an icon for better visual context
+                      SizedBox(width: 10), // Space between icon and text
+                      Text(
+                        'Capture Image',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -225,12 +277,42 @@ class HomePage extends StatelessWidget {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: Text('Warning'),
-                            content: Text('The selected image is not a plant.'),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0), // Rounded corners
+                            ),
+                            title: const Row(
+                              children: [
+                                Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+                                SizedBox(width: 10),
+                                Text(
+                                  'Warning',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            content: const Text(
+                              'The selected image is not a falcata plant. Please try again with a valid image.',
+                              style: TextStyle(fontSize: 16),
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(),
-                                child: Text('OK'),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: Colors.red,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'OK',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -239,22 +321,32 @@ class HomePage extends StatelessWidget {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 30.0),
+                    backgroundColor: Colors.teal, // Eye-catching background color
+                    foregroundColor: Colors.white, // Text color for better contrast
+                    padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 30.0), // Spacious padding
                     textStyle: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
+                      borderRadius: BorderRadius.circular(25.0), // More rounded corners for a modern design
                     ),
+                    elevation: 5, // Adds subtle depth with shadow
+                    shadowColor: Colors.black54, // Shadow color for visibility
                   ),
-                  child: const Text(
-                    'Upload Image',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black,
-                    ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.image , size: 22, color: Colors.white), // Icon for context
+                      SizedBox(width: 10), // Space between icon and text
+                      Text(
+                        'Gallery Image',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

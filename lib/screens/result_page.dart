@@ -61,7 +61,7 @@ class _ResultPageState extends State<ResultPage> {
         Placemark place = placemarks.first;
         setState(() {
           _currentLocation =
-          "${place.street}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
+          "${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
         });
       } else {
         setState(() {
@@ -85,7 +85,7 @@ class _ResultPageState extends State<ResultPage> {
       final fileName = 'uploads/${DateTime.now().millisecondsSinceEpoch}.jpg';
 
       final storage = Supabase.instance.client.storage;
-      final response = await storage.from('plant-images').upload(fileName, file);
+      await storage.from('plant-images').upload(fileName, file);
 
 
       // Get the public URL for the uploaded image
@@ -105,7 +105,7 @@ class _ResultPageState extends State<ResultPage> {
         'location': latlong,
       };
 
-      final resultInsert = await Supabase.instance.client
+      await Supabase.instance.client
           .from('plant_classifications')
           .insert(data);
 
@@ -140,6 +140,18 @@ class _ResultPageState extends State<ResultPage> {
     Color resultTextColor = result == 'Healthy' ? Colors.green.shade700 : Colors.red.shade700;
 
     return Scaffold(
+      extendBodyBehindAppBar: true, // Ensures the AppBar overlays the body
+      appBar: AppBar(
+        backgroundColor: Colors.transparent, // Transparent AppBar
+        elevation: 0, // No shadow
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0), // Adjust padding for logo
+          child: Image.asset(
+            'assets/logo.png', // Path to your logo image
+            fit: BoxFit.contain, // Ensures the logo fits properly
+          ),
+        ),
+      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -164,36 +176,42 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: backgroundColor,
-                    border: Border.all(color: borderColor, width: 3),
-                  ),
-                  child: Icon(
-                    resultIcon,
-                    size: 30,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 30),
-                Container(
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.8),  // Background color with transparency
-                    borderRadius: BorderRadius.circular(12.0),  // Rounded corners
-                    border: Border.all(color: resultTextColor, width: 3),  // Border with color
-                  ),
-                  child: Text(
-                    'The Plant is: $result',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: resultTextColor,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // Centers the content horizontally
+                  crossAxisAlignment: CrossAxisAlignment.center, // Centers the content vertically
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: backgroundColor,
+                        border: Border.all(color: borderColor, width: 3),
+                      ),
+                      child: Icon(
+                        resultIcon,
+                        size: 20,
+                        color: Colors.white,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
+                    const SizedBox(width: 20), // Horizontal spacing between the icon and the text
+                    Container(
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.8), // Background color with transparency
+                        borderRadius: BorderRadius.circular(12.0), // Rounded corners
+                        border: Border.all(color: resultTextColor, width: 3), // Border with color
+                      ),
+                      child: Text(
+                        'The Plant is: $result',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: resultTextColor,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
                 ),
                 if (_currentLocation != null)
                   Container(
@@ -219,7 +237,7 @@ class _ResultPageState extends State<ResultPage> {
                             Text(
                               'Current Location',
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.teal.shade700,  // Color for title
                               ),
@@ -231,7 +249,7 @@ class _ResultPageState extends State<ResultPage> {
                         Text(
                           _currentLocation?.replaceAll(",", "\n") ?? "Unknown Location",
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 15,
                             color: Colors.black,  // Color for the actual location
                           ),
                           textAlign: TextAlign.center,
