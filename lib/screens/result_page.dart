@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ResultPage extends StatefulWidget {
   @override
@@ -21,6 +22,14 @@ class _ResultPageState extends State<ResultPage> {
 
   Future<void> _fetchLocation() async {
     try {
+      var connectivityResult = await (Connectivity().checkConnectivity());
+      if (connectivityResult == ConnectivityResult.none) {
+        setState(() {
+          _currentLocation = "Internet connection is required to fetch the location.";
+        });
+        return;
+      }
+
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         setState(() {
@@ -70,7 +79,7 @@ class _ResultPageState extends State<ResultPage> {
       }
     } catch (e) {
       setState(() {
-        _currentLocation = "Error fetching location: $e";
+        _currentLocation = "Error fetching location. Please check Internet Connectivity or Location Permission.";
       });
     }
   }
@@ -132,11 +141,13 @@ class _ResultPageState extends State<ResultPage> {
   Widget build(BuildContext context) {
     final Map<String, dynamic> arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final String result = arguments['result'] as String;
+    final double confidence = arguments['confidence'];
+    final int confidencePercentage = (confidence * 100).toInt();
     final String imagePath = arguments['imagePath'] as String;
 
-    Color backgroundColor = result == 'Healthy' ? Colors.green : Colors.red;
-    Color borderColor = result == 'Healthy' ? Colors.green.shade700 : Colors.red.shade700;
-    IconData resultIcon = result == 'Healthy' ? Icons.check_circle : Icons.error_rounded;
+    // Color backgroundColor = result == 'Healthy' ? Colors.green : Colors.red;
+    // Color borderColor = result == 'Healthy' ? Colors.green.shade700 : Colors.red.shade700;
+    // IconData resultIcon = result == 'Healthy' ? Icons.check_circle : Icons.error_rounded;
     Color resultTextColor = result == 'Healthy' ? Colors.green.shade700 : Colors.red.shade700;
 
     return Scaffold(
@@ -181,20 +192,6 @@ class _ResultPageState extends State<ResultPage> {
                   crossAxisAlignment: CrossAxisAlignment.center, // Centers the content vertically
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: backgroundColor,
-                        border: Border.all(color: borderColor, width: 3),
-                      ),
-                      child: Icon(
-                        resultIcon,
-                        size: 20,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(width: 20), // Horizontal spacing between the icon and the text
-                    Container(
                       padding: const EdgeInsets.all(16.0),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.8), // Background color with transparency
@@ -202,7 +199,7 @@ class _ResultPageState extends State<ResultPage> {
                         border: Border.all(color: resultTextColor, width: 3), // Border with color
                       ),
                       child: Text(
-                        'The Plant is: $result',
+                        'The Plant is: $result \n Confidence: $confidencePercentage%',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
