@@ -84,7 +84,7 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
-  Future<void> _uploadToSupabase(String imagePath, String result) async {
+  Future<void> _uploadToSupabase(String imagePath, String result, int confidencePercentage) async {
     setState(() {
       isLoading = true;  // Start loading when the upload starts
     });
@@ -112,6 +112,7 @@ class _ResultPageState extends State<ResultPage> {
         'image_url': imageUrl,
         'classification': result,
         'location': latlong,
+        'confidence': "$confidencePercentage%"
       };
 
       await Supabase.instance.client
@@ -265,7 +266,7 @@ class _ResultPageState extends State<ResultPage> {
                           ? null  // Disable the button while loading
                           : () async {
                         // Upload to Supabase
-                        await _uploadToSupabase(imagePath, result);
+                        await _uploadToSupabase(imagePath, result, confidencePercentage);
                       },
                       icon: isLoading
                           ? const CircularProgressIndicator(
