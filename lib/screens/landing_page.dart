@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class LandingPage extends StatelessWidget {
+  const LandingPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,10 +29,13 @@ class LandingPage extends StatelessWidget {
                   'TREENSE',
                   style: TextStyle(
                     fontSize: 36, // Larger font size for emphasis
-                    color: Colors.teal, // A color that blends well with the background
-                    fontWeight: FontWeight.bold, // Bold for a more prominent look
+                    color: Colors
+                        .teal, // A color that blends well with the background
+                    fontWeight:
+                        FontWeight.bold, // Bold for a more prominent look
                     letterSpacing: 2.0, // Adds some space between the letters
-                    fontFamily: 'Arial', // Optional: You can choose a custom font for a different look
+                    fontFamily:
+                        'Arial', // Optional: You can choose a custom font for a different look
                     shadows: [
                       Shadow(
                         blurRadius: 5.0,
@@ -40,14 +45,16 @@ class LandingPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 50.0), // Add some space between logo and button
+                const SizedBox(
+                    height: 50.0), // Add some space between logo and button
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/home');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
-                    padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 30.0),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 15.0, horizontal: 30.0),
                     textStyle: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

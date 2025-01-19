@@ -6,13 +6,15 @@ import 'package:geocoding/geocoding.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ResultPage extends StatefulWidget {
+  const ResultPage({super.key});
+
   @override
   _ResultPageState createState() => _ResultPageState();
 }
 
 class _ResultPageState extends State<ResultPage> {
   String? _currentLocation;
-  bool isLoading = false;  // Track loading state
+  bool isLoading = false; // Track loading state
 
   @override
   void initState() {
@@ -25,7 +27,8 @@ class _ResultPageState extends State<ResultPage> {
       var connectivityResult = await (Connectivity().checkConnectivity());
       if (connectivityResult == ConnectivityResult.none) {
         setState(() {
-          _currentLocation = "Internet connection is required to fetch the location.";
+          _currentLocation =
+              "Internet connection is required to fetch the location.";
         });
         return;
       }
@@ -70,7 +73,7 @@ class _ResultPageState extends State<ResultPage> {
         Placemark place = placemarks.first;
         setState(() {
           _currentLocation =
-          "${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
+              "${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
         });
       } else {
         setState(() {
@@ -79,14 +82,16 @@ class _ResultPageState extends State<ResultPage> {
       }
     } catch (e) {
       setState(() {
-        _currentLocation = "Error fetching location. Please check Internet Connectivity or Location Permission.";
+        _currentLocation =
+            "Error fetching location. Please check Internet Connectivity or Location Permission.";
       });
     }
   }
 
-  Future<void> _uploadToSupabase(String imagePath, String result, int confidencePercentage) async {
+  Future<void> _uploadToSupabase(
+      String imagePath, String result, int confidencePercentage) async {
     setState(() {
-      isLoading = true;  // Start loading when the upload starts
+      isLoading = true; // Start loading when the upload starts
     });
 
     try {
@@ -96,7 +101,6 @@ class _ResultPageState extends State<ResultPage> {
       final storage = Supabase.instance.client.storage;
       await storage.from('plant-images').upload(fileName, file);
 
-
       // Get the public URL for the uploaded image
       final imageUrl = storage.from('plant-images').getPublicUrl(fileName);
 
@@ -105,7 +109,8 @@ class _ResultPageState extends State<ResultPage> {
       );
       // Get location
 
-      final latlong = "Latitude: ${position.latitude}, Longitude: ${position.longitude}";
+      final latlong =
+          "Latitude: ${position.latitude}, Longitude: ${position.longitude}";
 
       // Insert data into the 'plant_classifications' table
       final data = {
@@ -115,10 +120,7 @@ class _ResultPageState extends State<ResultPage> {
         'confidence': "$confidencePercentage%"
       };
 
-      await Supabase.instance.client
-          .from('plant_classifications')
-          .insert(data);
-
+      await Supabase.instance.client.from('plant_classifications').insert(data);
 
       // Notify the user of success
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -133,14 +135,15 @@ class _ResultPageState extends State<ResultPage> {
       ));
     } finally {
       setState(() {
-        isLoading = false;  // Stop loading after the upload is complete
+        isLoading = false; // Stop loading after the upload is complete
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic> arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final Map<String, dynamic> arguments =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final String result = arguments['result'] as String;
     final double confidence = arguments['confidence'];
     final int confidencePercentage = (confidence * 100).toInt();
@@ -149,7 +152,8 @@ class _ResultPageState extends State<ResultPage> {
     // Color backgroundColor = result == 'Healthy' ? Colors.green : Colors.red;
     // Color borderColor = result == 'Healthy' ? Colors.green.shade700 : Colors.red.shade700;
     // IconData resultIcon = result == 'Healthy' ? Icons.check_circle : Icons.error_rounded;
-    Color resultTextColor = result == 'Healthy' ? Colors.green.shade700 : Colors.red.shade700;
+    Color resultTextColor =
+        result == 'Healthy' ? Colors.green.shade700 : Colors.red.shade700;
 
     return Scaffold(
       extendBodyBehindAppBar: true, // Ensures the AppBar overlays the body
@@ -189,15 +193,21 @@ class _ResultPageState extends State<ResultPage> {
                 ),
                 const SizedBox(height: 30),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center, // Centers the content horizontally
-                  crossAxisAlignment: CrossAxisAlignment.center, // Centers the content vertically
+                  mainAxisAlignment: MainAxisAlignment
+                      .center, // Centers the content horizontally
+                  crossAxisAlignment: CrossAxisAlignment
+                      .center, // Centers the content vertically
                   children: [
                     Container(
                       padding: const EdgeInsets.all(16.0),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.8), // Background color with transparency
-                        borderRadius: BorderRadius.circular(12.0), // Rounded corners
-                        border: Border.all(color: resultTextColor, width: 3), // Border with color
+                        color: Colors.white.withOpacity(
+                            0.8), // Background color with transparency
+                        borderRadius:
+                            BorderRadius.circular(12.0), // Rounded corners
+                        border: Border.all(
+                            color: resultTextColor,
+                            width: 3), // Border with color
                       ),
                       child: Text(
                         'The Plant is: $result \n Confidence: $confidencePercentage%',
@@ -216,9 +226,13 @@ class _ResultPageState extends State<ResultPage> {
                     padding: const EdgeInsets.all(16.0),
                     margin: const EdgeInsets.symmetric(vertical: 10.0),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.8),  // Background color with transparency
-                      borderRadius: BorderRadius.circular(12.0),  // Rounded corners
-                      border: Border.all(color: Colors.teal, width: 2),  // Border color and thickness
+                      color: Colors.white.withOpacity(
+                          0.8), // Background color with transparency
+                      borderRadius:
+                          BorderRadius.circular(12.0), // Rounded corners
+                      border: Border.all(
+                          color: Colors.teal,
+                          width: 2), // Border color and thickness
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -227,17 +241,18 @@ class _ResultPageState extends State<ResultPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Icon(
-                              Icons.location_on,  // Location icon
+                              Icons.location_on, // Location icon
                               color: Colors.red,
-                              size: 24,  // Icon size
+                              size: 24, // Icon size
                             ),
-                            const SizedBox(width: 8),  // Space between icon and text
+                            const SizedBox(
+                                width: 8), // Space between icon and text
                             Text(
                               'Current Location',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.teal.shade700,  // Color for title
+                                color: Colors.teal.shade700, // Color for title
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -245,10 +260,12 @@ class _ResultPageState extends State<ResultPage> {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          _currentLocation?.replaceAll(",", "\n") ?? "Unknown Location",
+                          _currentLocation?.replaceAll(",", "\n") ??
+                              "Unknown Location",
                           style: const TextStyle(
                             fontSize: 15,
-                            color: Colors.black,  // Color for the actual location
+                            color:
+                                Colors.black, // Color for the actual location
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -263,24 +280,28 @@ class _ResultPageState extends State<ResultPage> {
                   children: [
                     ElevatedButton.icon(
                       onPressed: isLoading
-                          ? null  // Disable the button while loading
+                          ? null // Disable the button while loading
                           : () async {
-                        // Upload to Supabase
-                        await _uploadToSupabase(imagePath, result, confidencePercentage);
-                      },
+                              // Upload to Supabase
+                              await _uploadToSupabase(
+                                  imagePath, result, confidencePercentage);
+                            },
                       icon: isLoading
                           ? const CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.teal),
-                        strokeWidth: 2,
-                      )
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.teal),
+                              strokeWidth: 2,
+                            )
                           : const Icon(Icons.cloud_upload, color: Colors.teal),
                       label: Text(
                         isLoading ? 'Uploading...' : 'Upload',
-                        style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            color: Colors.teal, fontWeight: FontWeight.bold),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10.0, horizontal: 20.0),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
@@ -294,11 +315,13 @@ class _ResultPageState extends State<ResultPage> {
                       icon: const Icon(Icons.home, color: Colors.teal),
                       label: const Text(
                         'Home',
-                        style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: Colors.teal, fontWeight: FontWeight.bold),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10.0, horizontal: 20.0),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
