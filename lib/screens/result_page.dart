@@ -86,23 +86,28 @@ class _ResultPageState extends State<ResultPage> {
 
   Future<void> _uploadToSupabase(String imagePath, String result, int confidencePercentage) async {
     setState(() {
-      isLoading = true; 
+      isLoading = true;  // Start loading when the upload starts
     });
 
     try {
       final file = File(imagePath);
       final fileName = 'uploads/${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final storage = Supabase.instance.client.storage;
 
+      final storage = Supabase.instance.client.storage;
       await storage.from('plant-images').upload(fileName, file);
 
+
+      // Get the public URL for the uploaded image
       final imageUrl = storage.from('plant-images').getPublicUrl(fileName);
+
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
+      // Get location
 
       final latlong = "Latitude: ${position.latitude}, Longitude: ${position.longitude}";
-      
+
+      // Insert data into the 'plant_classifications' table
       final data = {
         'image_url': imageUrl,
         'classification': result,

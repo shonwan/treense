@@ -110,17 +110,27 @@ Future<bool> isPlant(File imageFile) async {
 // Function to check the health status of the plant
 Future<Map<String, dynamic>> checkPlantHealth(File imageFile) async {
   try {
-    var inputShape = healthCheckerInterpreter.getInputTensor(0).shape; 
+    // Get input shape of the model
+    var inputShape = healthCheckerInterpreter.getInputTensor(0).shape; // Example: [1, 180, 180, 3]
+
+    // Preprocess image and reshape it to match input shape
     var input = await preprocessImage(imageFile, inputShape);
     if (input.isEmpty) return {'result': 'empty', 'confidence': 0.0};
-    var outputShape = healthCheckerInterpreter.getOutputTensor(0).shape; 
+
+    // Prepare the output tensor
+    var outputShape = healthCheckerInterpreter.getOutputTensor(0).shape; // Example: [1, 1]
     var output = List.generate(outputShape[0], (_) => List.filled(outputShape[1], 0.0));
 
+    // Run inference
     healthCheckerInterpreter.run(input, output);
 
-    double probability = output[0][0]; 
+    // Access the probability from the output
+    double probability = output[0][0]; // Accessing the single value in the [1, 1] output
+
+    // Calculate confidence for Healthy and Unhealthy classifications
     double confidence = probability > 0.5 ? probability : 1 - probability;
 
+    // Interpret the result based on thresholding
     if (probability > 0.5) {
       print('Image classified as Unhealthy (Confidence: ${confidence.toStringAsFixed(2)})');
       return {'result': 'Unhealthy', 'confidence': confidence};
@@ -130,7 +140,7 @@ Future<Map<String, dynamic>> checkPlantHealth(File imageFile) async {
     }
   } catch (e) {
     print('Error classifying image: $e');
-    return {'result': 'Unhealthy', 'confidence': 0.0}; 
+    return {'result': 'Unhealthy', 'confidence': 0.0}; // Default to Unhealthy with 0 confidence on error
   }
 }
 
