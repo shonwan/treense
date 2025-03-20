@@ -1,6 +1,7 @@
-# Treense
+# TREENSE
+### What is treense and what does it do?
 
-What is treense and what does it do?
+
 
 
 ## Getting Started
