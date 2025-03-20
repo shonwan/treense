@@ -1,6 +1,7 @@
-# treense
+# Treense
 
-A new Flutter project.
+What is treense and what does it do?
+
 
 ## Getting Started
 
