@@ -1,8 +1,6 @@
 # TREENSE
 ### What is treense and what does it do?
-
-
-
+The Treense app is an application that provides immediate results for classifying whether falcata seedlings are healthy or unhealthy.
 
 ## INSTALLATION AND USAGE
 This guide provides instructions for installing and using the Treense Application Installation Guide
