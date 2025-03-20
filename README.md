@@ -4,7 +4,7 @@
 
 
 
-## INSTALLATION
+## INSTALLATION AND USAGE
 This guide provides instructions for installing and using the Treense Application Installation Guide
 
 #### Step 1: Download the Application
