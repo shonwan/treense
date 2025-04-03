@@ -8,7 +8,7 @@ This guide provides instructions for installing and using the Treense Applicatio
 #### Step 1: Download the Application
 1. Scan the QR code and download the apk file.
 
-   ![image](https://github.com/user-attachments/assets/6587b739-121a-4408-9ebb-fdb4503d362a)
+   ![image](https://github.com/user-attachments/assets/659170e6-d90c-4506-a5c4-dfff8d485181)
 
 2. Then click the apk file and click the "Install" button and wait for the installation process to complete.
 
