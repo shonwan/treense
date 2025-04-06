@@ -1,7 +1,3 @@
-Absolutely! Here's a `README.md` tailored for the **Treense Mobile Application**:
-
----
-
 # 🌱 Treense Mobile App
 
 **Treense** is a mobile application that uses image classification to determine the health of **Falcata seedlings**. Designed for consumers buying seedlings, Treense provides a **quick, offline-capable**, and **easy-to-use** way to identify healthy and unhealthy plants in just seconds.
