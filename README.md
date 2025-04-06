@@ -57,7 +57,7 @@
 Treense solves three key problems:
 - ❌ **Misclassification** due to lack of knowledge
 - 🕒 **Time-consuming** health checks in large nurseries
-- ⏱️ **Delayed disease detection** due to visual-only inspection
+- ⏱️ **Delayed health assesment** due to visual-only inspection
 
 Using AI and mobile technology, Treense makes classification **faster**, **easier**, and **smarter** for everyone.
 
