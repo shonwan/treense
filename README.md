@@ -26,6 +26,7 @@
 ## 📥 Installation
 
 1. **Scan the QR code**.
+   
    ![image](https://github.com/user-attachments/assets/331b873b-e648-484d-9687-31062a7392bf)
 
 3. **Download and install the APK file** on your Android device.
