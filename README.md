@@ -67,6 +67,3 @@ Using AI and mobile technology, Treense makes classification **faster**, **easie
 
 All classification data can be viewed and analyzed through our **web-based admin interface**, giving admins a birds-eye view of trends, history, and reports.
 
----
-
-Let me know if you want a downloadable version, branding (with logo, badges), or if you'd like this added to your GitHub/mobile dev repo!
